@@ -5,21 +5,37 @@ import PriceFallers from "@/components/PriceFallers";
 import AllProducts from "@/components/AllProducts";
 import { type Product } from "@/lib/utils";
 
+export const dynamic = "force-dynamic";
+
 const PRODUCTS_API =
-  "https://api.abcz.workers.dev/api/bazardor/products";
+  "https://openapi.programming-hero.com/api/bazardor/products";
 
 async function getProducts(): Promise<Product[]> {
-  const response = await fetch(PRODUCTS_API, {
-    next: { revalidate: 300 },
-  });
+  try {
+    const response = await fetch(PRODUCTS_API, {
+      cache: "no-store",
+    });
 
-  if (!response.ok) {
-    throw new Error("Failed to fetch products");
+    if (!response.ok) {
+      console.error(
+        "Products API returned:",
+        response.status
+      );
+      return [];
+    }
+
+    const data: unknown = await response.json();
+
+    if (!Array.isArray(data)) {
+      console.error("Unexpected products API response");
+      return [];
+    }
+
+    return data as Product[];
+  } catch (error) {
+    console.error("Failed to load products:", error);
+    return [];
   }
-
-  const products: Product[] = await response.json();
-
-  return products;
 }
 
 export default async function Home() {
@@ -28,11 +44,8 @@ export default async function Home() {
   return (
     <main className="min-h-screen bg-[#eff5f0]">
       <Hero />
-
       <PriceRisers products={products} />
-
       <PriceFallers products={products} />
-
       <AllProducts products={products} />
     </main>
   );

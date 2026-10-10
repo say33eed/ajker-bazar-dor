@@ -7,7 +7,7 @@ import {
   type Category,
 } from "@/lib/utils";
 
-const API = "https://api.abcz.workers.dev/api/bazardor";
+const API = "https://openapi.programming-hero.com/api/bazardor";
 
 type PageProps = {
   params: Promise<{ slug: string }>;

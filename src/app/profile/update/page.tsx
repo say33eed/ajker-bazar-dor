@@ -7,24 +7,17 @@ import { useEffect, useState, type FormEvent } from "react";
 import { authClient, useSession } from "@/lib/auth-client";
 import toast from "react-hot-toast";
 
-export default function UpdateProfilePage() {
+function UpdateProfileForm({
+  currentName,
+  email,
+}: {
+  currentName: string;
+  email: string;
+}) {
   const router = useRouter();
-  const { data: session, isPending } = useSession();
 
-  const [name, setName] = useState("");
+  const [name, setName] = useState(currentName);
   const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    if (session?.user.name) {
-      setName(session.user.name);
-    }
-  }, [session?.user.name]);
-
-  useEffect(() => {
-    if (!isPending && !session) {
-      router.replace("/signin");
-    }
-  }, [isPending, session, router]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -58,14 +51,6 @@ export default function UpdateProfilePage() {
     } finally {
       setSaving(false);
     }
-  }
-
-  if (isPending || !session) {
-    return (
-      <main className="flex min-h-[70vh] items-center justify-center bg-[#eff5f0]">
-        <span className="loading loading-spinner loading-lg text-[#008b45]" />
-      </main>
-    );
   }
 
   return (
@@ -119,11 +104,10 @@ export default function UpdateProfilePage() {
               <input
                 id="email"
                 type="email"
-                value={session.user.email}
+                value={email}
                 readOnly
                 className="input w-full cursor-not-allowed border-[#dfe8e0] bg-[#f1f4f1] text-gray-500"
               />
-
               <p className="mt-2 text-xs text-[#68756b]">
                 এখানে ইমেইল পরিবর্তন করা যাবে না।
               </p>
@@ -140,5 +124,32 @@ export default function UpdateProfilePage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function UpdateProfilePage() {
+  const router = useRouter();
+  const { data: session, isPending } = useSession();
+
+  useEffect(() => {
+    if (!isPending && !session) {
+      router.replace("/signin");
+    }
+  }, [isPending, session, router]);
+
+  if (isPending || !session) {
+    return (
+      <main className="flex min-h-[70vh] items-center justify-center bg-[#eff5f0]">
+        <span className="loading loading-spinner loading-lg text-[#008b45]" />
+      </main>
+    );
+  }
+
+  return (
+    <UpdateProfileForm
+      key={session.user.id}
+      currentName={session.user.name}
+      email={session.user.email}
+    />
   );
 }

@@ -12,7 +12,7 @@ export default function PriceTicker() {
   const [products, setProducts] = useState<Product[]>([]);
 
   useEffect(() => {
-    fetch("https://api.abcz.workers.dev/api/bazardor/products")
+    fetch("https://openapi.programming-hero.com/api/bazardor/products")
       .then((res) => {
         if (!res.ok) {
           throw new Error("Products could not load");
