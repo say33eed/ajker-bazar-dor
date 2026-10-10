@@ -4,21 +4,35 @@ import type { NextRequest } from "next/server";
 import { auth } from "./lib/auth";
 
 export async function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  const isProtectedRoute =
+    pathname === "/profile" ||
+    pathname.startsWith("/profile/");
+
+  // Public pages, including product details, need no login.
+  if (!isProtectedRoute) {
+    return NextResponse.next();
+  }
+
   const session = await auth.api.getSession({
     headers: request.headers,
   });
 
-  const user = session?.user;
+  if (!session?.user) {
+    const signInUrl = new URL("/signin", request.url);
 
-  if (!user) {
-    return NextResponse.redirect(
-      new URL("/signin", request.url)
+    signInUrl.searchParams.set(
+      "callbackUrl",
+      pathname
     );
+
+    return NextResponse.redirect(signInUrl);
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/product/:path*", "/profile/:path*"],
+  matcher: ["/profile", "/profile/:path*"],
 };
