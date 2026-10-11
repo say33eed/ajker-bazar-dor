@@ -30,9 +30,7 @@ function Avatar({
     name.trim().charAt(0).toUpperCase() || "U";
 
   const sizeClass =
-    size === "medium"
-      ? "h-11 w-11"
-      : "h-9 w-9";
+    size === "medium" ? "h-11 w-11" : "h-9 w-9";
 
   return (
     <div
@@ -90,7 +88,9 @@ export default function Navbar() {
           throw new Error("Unexpected categories response");
         }
 
-        setCategories(data as Category[]);
+        if (!controller.signal.aborted) {
+          setCategories(data as Category[]);
+        }
       } catch (error) {
         if (controller.signal.aborted) return;
 
@@ -135,7 +135,7 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-gray-200 bg-[#f9fbf9]">
-      {/* First row: brand and authentication */}
+      {/* FIRST ROW: BRAND AND AUTHENTICATION */}
       <div className="mx-auto flex max-w-[1120px] items-center justify-between px-4 py-3">
         {/* Brand */}
         <Link
@@ -181,10 +181,7 @@ export default function Navbar() {
                 সাইন ইন
               </Link>
 
-              <Link
-                href="/signup"
-                className={primaryButtonClass}
-              >
+              <Link href="/signup" className={primaryButtonClass}>
                 সাইন আপ
               </Link>
             </>
@@ -199,9 +196,7 @@ export default function Navbar() {
             setMobileMenuOpen((previous) => !previous)
           }
           aria-label={
-            mobileMenuOpen
-              ? "মেনু বন্ধ করুন"
-              : "মেনু খুলুন"
+            mobileMenuOpen ? "মেনু বন্ধ করুন" : "মেনু খুলুন"
           }
           aria-expanded={mobileMenuOpen}
           aria-controls="mobile-category-navigation"
@@ -227,7 +222,7 @@ export default function Navbar() {
         </button>
       </div>
 
-      {/* Second row: product categories */}
+      {/* SECOND ROW: CENTERED CATEGORIES */}
       <div className="border-t border-gray-100">
         <nav
           id="mobile-category-navigation"
@@ -236,8 +231,8 @@ export default function Navbar() {
             mobileMenuOpen ? "block" : "hidden md:block"
           }`}
         >
-          {/* Categories */}
-          <ul className="flex flex-wrap items-center gap-1 py-2 md:gap-2">
+          {/* Category links */}
+          <ul className="flex flex-wrap items-center justify-center gap-x-2 gap-y-2 py-2 md:gap-x-3">
             {categories.map((category) => {
               const active =
                 pathname === `/category/${category.slug}`;
@@ -247,9 +242,7 @@ export default function Navbar() {
                   <Link
                     href={`/category/${category.slug}`}
                     onClick={() => setMobileMenuOpen(false)}
-                    aria-current={
-                      active ? "page" : undefined
-                    }
+                    aria-current={active ? "page" : undefined}
                     className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[13px] font-semibold transition-colors ${
                       active
                         ? "bg-[#008b45] text-white"
@@ -267,7 +260,7 @@ export default function Navbar() {
             })}
           </ul>
 
-          {/* Mobile authentication */}
+          {/* MOBILE AUTHENTICATION */}
           {mobileMenuOpen && (
             <div className="border-t border-gray-100 py-4 md:hidden">
               {isPending ? (
@@ -346,9 +339,7 @@ export default function Navbar() {
                         <path d="M21 12H9" />
                       </svg>
 
-                      {signingOut
-                        ? "অপেক্ষা..."
-                        : "সাইন আউট"}
+                      {signingOut ? "অপেক্ষা..." : "সাইন আউট"}
                     </button>
                   </div>
                 </div>
@@ -376,7 +367,7 @@ export default function Navbar() {
         </nav>
       </div>
 
-      {/* Price ticker */}
+      {/* THIRD ROW: PRICE TICKER */}
       <PriceTicker />
     </header>
   );
