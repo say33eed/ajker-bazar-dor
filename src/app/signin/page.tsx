@@ -3,9 +3,23 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { signIn } from "@/lib/auth-client";
+import GoogleIcon from "@/components/GoogleIcon";
 import toast from "react-hot-toast";
+
+function GitHubIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-4 w-4 shrink-0"
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <path d="M12 .8a11.2 11.2 0 0 0-3.54 21.82c.56.1.77-.24.77-.54v-2.1c-3.13.68-3.79-1.33-3.79-1.33-.51-1.3-1.25-1.25-1.25-1.02-.7.08-.69.08-.69 1.13.08 1.73 1.16 1.73 1.16 1.01 1.72 2.65 1.22 3.29.93.1-.73.4-1.22.72-1.5-2.5-.28-5.13-1.25-5.13-5.57 0-1.23.44-2.24 1.16-3.03-.12-.28-.5-1.43.11-2.98 0 0 .95-.3 3.08 1.16a10.75 10.75 0 0 1 5.6 0c2.14-1.45 3.08-1.16 3.08-1.16.62 1.55.23 2.7.12 2.98.72.79 1.15 1.8 1.15 3.03 0 4.33-2.63 5.28-5.14 5.56.41.35.77 1.03.77 2.08v3.08c0 4.33-2.63 5.28-5.14 5.56.41.35.77 1.03.77 2.08v3.08c0 .3.2.65.78.54A11.2 11.2 0 0 0 12 .8z" />
+    </svg>
+  );
+}
 
 export default function SignInPage() {
   const router = useRouter();
@@ -14,32 +28,58 @@ export default function SignInPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [socialLoading, setSocialLoading] = useState<
+    "google" | "github" | null
+  >(null);
+
+  const oauthError = searchParams.get("error");
+  const oauthErrorDescription = searchParams.get("error_description");
+
+  const requestedPath = searchParams.get("callbackUrl");
+
+  const destination =
+    requestedPath?.startsWith("/") &&
+    !requestedPath.startsWith("//") &&
+    !requestedPath.startsWith("/\\")
+      ? requestedPath
+      : "/";
+
+  useEffect(() => {
+    if (!oauthError) return;
+
+    const message =
+      oauthError === "account_not_linked"
+        ? "এই ইমেইলে আগে অ্যাকাউন্ট আছে। ইমেইল ও পাসওয়ার্ড দিয়ে সাইন ইন করে Google অ্যাকাউন্ট লিংক করুন।"
+        : oauthErrorDescription ||
+          `সোশ্যাল লগইন ব্যর্থ হয়েছে: ${oauthError}`;
+
+    toast.error(message, {
+      id: "signin-oauth-error",
+      duration: 7000,
+    });
+  }, [oauthError, oauthErrorDescription]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (loading) return;
+
     setLoading(true);
 
     try {
       const result = await signIn.email({
-        email,
+        email: email.trim(),
         password,
       });
 
       if (result.error) {
-        toast.error(result.error.message || "সাইন ইন ব্যর্থ হয়েছে");
+        toast.error(
+          result.error.message || "সাইন ইন ব্যর্থ হয়েছে"
+        );
         return;
       }
 
       toast.success("সাইন ইন সফল হয়েছে!");
-
-      const requestedPath = searchParams.get("callbackUrl");
-      const destination =
-        requestedPath?.startsWith("/") &&
-        !requestedPath.startsWith("//")
-          ? requestedPath
-          : "/profile";
-
-      router.push(destination);
+      router.replace(destination);
       router.refresh();
     } catch {
       toast.error("সাইন ইন করা যায়নি। আবার চেষ্টা করুন।");
@@ -48,76 +88,152 @@ export default function SignInPage() {
     }
   }
 
+  async function handleSocialLogin(
+    provider: "google" | "github"
+  ) {
+    if (socialLoading || loading) return;
+
+    setSocialLoading(provider);
+
+    try {
+      const result = await signIn.social({
+        provider,
+        callbackURL: destination,
+        errorCallbackURL: "/signin",
+      });
+
+      if (result.error) {
+        toast.error(
+          result.error.message || "সোশ্যাল লগইন ব্যর্থ হয়েছে"
+        );
+        setSocialLoading(null);
+      }
+    } catch {
+      toast.error("সোশ্যাল লগইন শুরু করা যায়নি");
+      setSocialLoading(null);
+    }
+  }
+
+  const inputClass =
+    "h-[35px] w-full rounded-[9px] border border-[#dce6de] bg-transparent px-3 text-[13px] text-[#243027] outline-none focus:border-[#008d43] focus:ring-1 focus:ring-[#008d43]";
+
+  const labelClass =
+    "mb-1.5 block text-[13px] font-semibold text-[#243027]";
+
+  const socialButtonClass =
+    "flex h-[35px] items-center justify-center gap-1.5 rounded-[8px] border border-[#dce6de] text-[11px] font-semibold text-[#26332a] hover:bg-[#f1f6f2] disabled:opacity-60";
+
   return (
-    <main className="flex min-h-[75vh] items-center justify-center bg-[#eff5f0] px-4 py-12">
-      <div className="w-full max-w-[440px] rounded-[20px] border border-[#dfe8e0] bg-[#fbfdfb] p-7 shadow-sm sm:p-9">
-        <h1 className="text-center text-[28px] font-bold text-[#202c23]">
-          সাইন ইন
-        </h1>
+    <main className="min-h-[calc(100vh-190px)] bg-[#f0f5f0] px-4 pb-14 pt-6">
+      <div className="mx-auto w-full max-w-[350px]">
+        <div className="mb-5 text-center">
+          <h1 className="text-[24px] font-extrabold text-[#1e2b21]">
+            সাইন ইন
+          </h1>
 
-        <p className="mt-2 text-center text-sm text-[#68756b]">
-          আপনার অ্যাকাউন্টে প্রবেশ করুন
-        </p>
+          <p className="mt-1 text-[12px] text-[#758177]">
+            বিস্তারিত দাম, বাজার তুলনা ও প্রোফাইল দেখতে অ্যাকাউন্টে ঢুকুন।
+          </p>
+        </div>
 
-        <form onSubmit={handleSubmit} className="mt-8 space-y-5">
-          <div>
-            <label
-              htmlFor="email"
-              className="mb-2 block text-sm font-semibold text-[#202c23]"
+        <div className="rounded-[15px] border border-[#dce6de] bg-[#fbfdfb] px-5 py-5">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label htmlFor="signin-email" className={labelClass}>
+                ইমেইল
+              </label>
+
+              <input
+                id="signin-email"
+                type="email"
+                required
+                autoComplete="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                placeholder="you@example.com"
+                className={inputClass}
+              />
+            </div>
+
+            <div>
+              <label htmlFor="signin-password" className={labelClass}>
+                পাসওয়ার্ড
+              </label>
+
+              <input
+                id="signin-password"
+                type="password"
+                required
+                autoComplete="current-password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                placeholder="কমপক্ষে ৮ অক্ষর"
+                className={inputClass}
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading || socialLoading !== null}
+              className="h-[36px] w-full rounded-[7px] bg-[#008e42] text-[13px] font-bold text-white shadow-[0_3px_3px_rgba(0,100,40,0.28)] hover:bg-[#007d39] disabled:opacity-60"
             >
-              ইমেইল
-            </label>
+              {loading ? "সাইন ইন হচ্ছে..." : "সাইন ইন"}
+            </button>
+          </form>
 
-            <input
-              id="email"
-              type="email"
-              required
-              autoComplete="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              placeholder="example@email.com"
-              className="input w-full border-[#dfe8e0] bg-white focus:border-[#008b45] focus:outline-[#008b45]"
-            />
+          <div className="my-4 flex items-center gap-3">
+            <div className="h-px flex-1 bg-[#dce6de]" />
+            <span className="text-[12px] text-[#6b786e]">
+              অথবা
+            </span>
+            <div className="h-px flex-1 bg-[#dce6de]" />
           </div>
 
-          <div>
-            <label
-              htmlFor="password"
-              className="mb-2 block text-sm font-semibold text-[#202c23]"
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => handleSocialLogin("google")}
+              disabled={loading || socialLoading !== null}
+              className={socialButtonClass}
             >
-              পাসওয়ার্ড
-            </label>
+              <GoogleIcon />
+              {socialLoading === "google"
+                ? "অপেক্ষা..."
+                : "Google দিয়ে চালিয়ে যান"}
+            </button>
 
-            <input
-              id="password"
-              type="password"
-              required
-              autoComplete="current-password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              placeholder="আপনার পাসওয়ার্ড লিখুন"
-              className="input w-full border-[#dfe8e0] bg-white focus:border-[#008b45] focus:outline-[#008b45]"
-            />
+            <button
+              type="button"
+              onClick={() => handleSocialLogin("github")}
+              disabled={loading || socialLoading !== null}
+              className={socialButtonClass}
+            >
+              <GitHubIcon />
+              {socialLoading === "github"
+                ? "অপেক্ষা..."
+                : "GitHub দিয়ে চালিয়ে যান"}
+            </button>
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="inline-flex w-full items-center justify-center rounded-[14px] border border-[#007a3c] bg-[#008b45] px-6 py-3 text-sm font-bold text-white shadow-[0_6px_10px_rgba(0,139,69,0.32)] transition-all hover:bg-[#007e3e] disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {loading ? "অপেক্ষা করুন..." : "সাইন ইন"}
-          </button>
-        </form>
+          <p className="mt-4 text-center text-[12px] text-[#445148]">
+            অ্যাকাউন্ট নেই?{" "}
+            <Link
+              href="/signup"
+              className="font-semibold text-[#008e42] hover:underline"
+            >
+              সাইন আপ করুন
+            </Link>
+          </p>
+        </div>
 
-        <p className="mt-6 text-center text-sm text-[#68756b]">
-          অ্যাকাউন্ট নেই?{" "}
+        <div className="mt-5 text-center">
           <Link
-            href="/signup"
-            className="font-bold text-[#008b45] hover:underline"
+            href="/"
+            className="text-[12px] text-[#849087] hover:text-[#008e42]"
           >
-            সাইন আপ করুন
+            ← হোম পেজে ফিরে যান
           </Link>
-        </p>
+        </div>
       </div>
     </main>
   );
