@@ -38,18 +38,19 @@ export default function SignInPage() {
 
     const message =
       oauthError === "account_not_linked"
-        ? "এই ইমেইলে আগে অ্যাকাউন্ট আছে। আগে আপনার বিদ্যমান অ্যাকাউন্টে সাইন ইন করে প্রোফাইল থেকে GitHub লিংক করুন।"
+        ? "এই ইমেইলে আগে অ্যাকাউন্ট আছে।"
         : oauthErrorDescription ||
           `সোশ্যাল লগইন ব্যর্থ হয়েছে: ${oauthError}`;
 
     toast.error(message, {
       id: "signin-oauth-error",
-      duration: 7000,
+      duration: 5000,
     });
   }, [oauthError, oauthErrorDescription]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
     if (loading) return;
 
     setLoading(true);
@@ -141,7 +142,9 @@ export default function SignInPage() {
                 required
                 autoComplete="email"
                 value={email}
-                onChange={(event) => setEmail(event.target.value)}
+                onChange={(event) =>
+                  setEmail(event.target.value)
+                }
                 placeholder="you@example.com"
                 className={inputClass}
               />
@@ -161,7 +164,9 @@ export default function SignInPage() {
                 required
                 autoComplete="current-password"
                 value={password}
-                onChange={(event) => setPassword(event.target.value)}
+                onChange={(event) =>
+                  setPassword(event.target.value)
+                }
                 placeholder="কমপক্ষে ৮ অক্ষর"
                 className={inputClass}
               />

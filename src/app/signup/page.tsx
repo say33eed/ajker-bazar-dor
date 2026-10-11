@@ -31,18 +31,19 @@ export default function SignUpPage() {
 
     const message =
       oauthError === "account_not_linked"
-        ? "এই ইমেইলে আগে অ্যাকাউন্ট আছে। আগে আপনার বিদ্যমান অ্যাকাউন্টে সাইন ইন করে প্রোফাইল থেকে GitHub লিংক করুন।"
+        ? "এই ইমেইলে আগে অ্যাকাউন্ট আছে।"
         : oauthErrorDescription ||
           `সোশ্যাল লগইন ব্যর্থ হয়েছে: ${oauthError}`;
 
     toast.error(message, {
       id: "signup-oauth-error",
-      duration: 7000,
+      duration: 5000,
     });
   }, [oauthError, oauthErrorDescription]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
     if (loading) return;
 
     if (!name.trim()) {
@@ -80,7 +81,9 @@ export default function SignUpPage() {
       router.replace("/signin");
       router.refresh();
     } catch {
-      toast.error("অ্যাকাউন্ট তৈরি করা যায়নি। আবার চেষ্টা করুন।");
+      toast.error(
+        "অ্যাকাউন্ট তৈরি করা যায়নি। আবার চেষ্টা করুন।"
+      );
     } finally {
       setLoading(false);
     }
@@ -143,13 +146,16 @@ export default function SignUpPage() {
               >
                 নাম
               </label>
+
               <input
                 id="signup-name"
                 type="text"
                 required
                 autoComplete="name"
                 value={name}
-                onChange={(event) => setName(event.target.value)}
+                onChange={(event) =>
+                  setName(event.target.value)
+                }
                 placeholder="যেমন: রহিম উদ্দিন"
                 className={inputClass}
               />
@@ -162,13 +168,16 @@ export default function SignUpPage() {
               >
                 ইমেইল
               </label>
+
               <input
                 id="signup-email"
                 type="email"
                 required
                 autoComplete="email"
                 value={email}
-                onChange={(event) => setEmail(event.target.value)}
+                onChange={(event) =>
+                  setEmail(event.target.value)
+                }
                 placeholder="you@example.com"
                 className={inputClass}
               />
@@ -181,6 +190,7 @@ export default function SignUpPage() {
               >
                 পাসওয়ার্ড
               </label>
+
               <input
                 id="signup-password"
                 type="password"
@@ -188,7 +198,9 @@ export default function SignUpPage() {
                 minLength={8}
                 autoComplete="new-password"
                 value={password}
-                onChange={(event) => setPassword(event.target.value)}
+                onChange={(event) =>
+                  setPassword(event.target.value)
+                }
                 placeholder="কমপক্ষে ৮ অক্ষর"
                 className={inputClass}
               />
@@ -201,6 +213,7 @@ export default function SignUpPage() {
               >
                 পাসওয়ার্ড নিশ্চিত করুন
               </label>
+
               <input
                 id="signup-confirm-password"
                 type="password"
