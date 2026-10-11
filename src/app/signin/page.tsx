@@ -20,18 +20,25 @@ export default function SignInPage() {
     "google" | "github" | null
   >(null);
 
+  // OAuth error returned by BetterAuth
   const oauthError = searchParams.get("error");
   const oauthErrorDescription =
     searchParams.get("error_description");
 
+  // Remember the product the visitor originally clicked
   const requestedPath = searchParams.get("callbackUrl");
 
+  // Only allow internal redirect paths
   const destination =
     requestedPath?.startsWith("/") &&
     !requestedPath.startsWith("//") &&
     !requestedPath.startsWith("/\\")
       ? requestedPath
       : "/";
+
+  // Preserve the destination if OAuth authentication fails
+  const oauthErrorCallbackURL =
+    `/signin?callbackUrl=${encodeURIComponent(destination)}`;
 
   useEffect(() => {
     if (!oauthError) return;
@@ -48,10 +55,11 @@ export default function SignInPage() {
     });
   }, [oauthError, oauthErrorDescription]);
 
+  // Email/password sign-in
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (loading) return;
+    if (loading || socialLoading) return;
 
     setLoading(true);
 
@@ -69,6 +77,8 @@ export default function SignInPage() {
       }
 
       toast.success("সাইন ইন সফল হয়েছে!");
+
+      // Return to the selected product
       router.replace(destination);
       router.refresh();
     } catch {
@@ -78,6 +88,7 @@ export default function SignInPage() {
     }
   }
 
+  // Google / GitHub sign-in
   async function handleSocialLogin(
     provider: "google" | "github"
   ) {
@@ -88,14 +99,19 @@ export default function SignInPage() {
     try {
       const result = await signIn.social({
         provider,
+
+        // Return to the selected product after successful OAuth
         callbackURL: destination,
-        errorCallbackURL: "/signin",
+
+        // Keep the selected product URL if OAuth fails
+        errorCallbackURL: oauthErrorCallbackURL,
       });
 
       if (result.error) {
         toast.error(
           result.error.message || "সোশ্যাল লগইন ব্যর্থ হয়েছে"
         );
+
         setSocialLoading(null);
       }
     } catch {
@@ -116,6 +132,8 @@ export default function SignInPage() {
   return (
     <main className="min-h-[calc(100vh-190px)] bg-[#f0f5f0] px-4 pb-14 pt-6">
       <div className="mx-auto w-full max-w-[350px]">
+
+        {/* Heading */}
         <div className="mb-5 text-center">
           <h1 className="text-[24px] font-extrabold text-[#1e2b21]">
             সাইন ইন
@@ -126,8 +144,14 @@ export default function SignInPage() {
           </p>
         </div>
 
+        {/* Sign-in card */}
         <div className="rounded-[15px] border border-[#dce6de] bg-[#fbfdfb] px-5 py-5">
-          <form onSubmit={handleSubmit} className="space-y-4">
+
+          {/* Email/password form */}
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-4"
+          >
             <div>
               <label
                 htmlFor="signin-email"
@@ -177,46 +201,63 @@ export default function SignInPage() {
               disabled={loading || socialLoading !== null}
               className="h-[36px] w-full rounded-[7px] bg-[#008e42] text-[13px] font-bold text-white shadow-[0_3px_3px_rgba(0,100,40,0.28)] hover:bg-[#007d39] disabled:opacity-60"
             >
-              {loading ? "সাইন ইন হচ্ছে..." : "সাইন ইন"}
+              {loading
+                ? "সাইন ইন হচ্ছে..."
+                : "সাইন ইন"}
             </button>
           </form>
 
+          {/* Divider */}
           <div className="my-4 flex items-center gap-3">
             <div className="h-px flex-1 bg-[#dce6de]" />
+
             <span className="text-[12px] text-[#6b786e]">
               অথবা
             </span>
+
             <div className="h-px flex-1 bg-[#dce6de]" />
           </div>
 
+          {/* Social authentication */}
           <div className="grid grid-cols-2 gap-2">
+
+            {/* Google */}
             <button
               type="button"
-              onClick={() => handleSocialLogin("google")}
+              onClick={() =>
+                handleSocialLogin("google")
+              }
               disabled={loading || socialLoading !== null}
               className={socialButtonClass}
             >
               <GoogleIcon />
+
               {socialLoading === "google"
                 ? "অপেক্ষা..."
                 : "Google দিয়ে চালিয়ে যান"}
             </button>
 
+            {/* GitHub */}
             <button
               type="button"
-              onClick={() => handleSocialLogin("github")}
+              onClick={() =>
+                handleSocialLogin("github")
+              }
               disabled={loading || socialLoading !== null}
               className={socialButtonClass}
             >
               <GitHubIcon />
+
               {socialLoading === "github"
                 ? "অপেক্ষা..."
                 : "GitHub দিয়ে চালিয়ে যান"}
             </button>
           </div>
 
+          {/* Sign-up link */}
           <p className="mt-4 text-center text-[12px] text-[#445148]">
             অ্যাকাউন্ট নেই?{" "}
+
             <Link
               href="/signup"
               className="font-semibold text-[#008e42] hover:underline"
@@ -226,6 +267,7 @@ export default function SignInPage() {
           </p>
         </div>
 
+        {/* Back home */}
         <div className="mt-5 text-center">
           <Link
             href="/"
