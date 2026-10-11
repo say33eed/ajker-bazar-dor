@@ -1,28 +1,93 @@
+
 @import "tailwindcss";
 @plugin "daisyui";
 
+/* ========================================
+   GLOBAL STYLES
+======================================== */
 
-/* Price Ticker*/
-@keyframes marquee {
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  overflow-x: clip;
+}
+
+/* ========================================
+   PRICE TICKER / MARQUEE
+======================================== */
+
+/*
+  Two identical sets of ticker items are
+  rendered side by side.
+
+  Moving the track by -50% shifts it by
+  exactly one complete set, allowing the
+  animation to restart seamlessly.
+*/
+
+@keyframes bazar-ticker-scroll {
   0% {
-    transform: translateX(0);
+    transform: translate3d(0, 0, 0);
   }
 
   100% {
-    transform: translateX(-50%);
+    transform: translate3d(-50%, 0, 0);
   }
 }
 
 .animate-marquee {
-  animation: marquee 30s linear infinite;
+  display: flex;
+  flex-wrap: nowrap;
+
+  width: max-content;
+  max-width: none;
+
+  animation-name: bazar-ticker-scroll;
+  animation-duration: 30s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-direction: normal;
+  animation-play-state: running;
+
+  will-change: transform;
 }
+
+/*
+  IMPORTANT DESKTOP FIX:
+
+  The implementation guide included a
+  hover rule that paused the marquee.
+
+  We keep the ticker moving on hover
+  so desktop mouse movement does not
+  freeze the animation.
+*/
 
 .animate-marquee:hover {
-  animation-play-state: paused;
+  animation-play-state: running;
 }
 
+/* Keep all ticker groups on one line */
+
+.animate-marquee > * {
+  flex-shrink: 0;
+}
+
+/* ========================================
+   ACCESSIBILITY
+======================================== */
+
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
   .animate-marquee {
     animation: none;
+    transform: none;
+    will-change: auto;
   }
 }
