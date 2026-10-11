@@ -8,6 +8,7 @@ import { signIn, signUp } from "@/lib/auth-client";
 import GoogleIcon from "@/components/GoogleIcon";
 import GitHubIcon from "@/components/GitHubIcon";
 import toast from "react-hot-toast";
+import { isValidEmail, withAuthToast } from "@/lib/auth-toast";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -26,6 +27,7 @@ export default function SignUpPage() {
   const oauthErrorDescription =
     searchParams.get("error_description");
 
+  // OAuth error notification.
   useEffect(() => {
     if (!oauthError) return;
 
@@ -41,18 +43,39 @@ export default function SignUpPage() {
     });
   }, [oauthError, oauthErrorDescription]);
 
+  // Email/password registration.
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (loading) return;
+    if (loading || socialLoading) return;
 
     if (!name.trim()) {
       toast.error("আপনার নাম লিখুন");
       return;
     }
 
+    if (!email.trim()) {
+      toast.error("ইমেইল লিখুন");
+      return;
+    }
+
+    if (!isValidEmail(email.trim())) {
+      toast.error("সঠিক ইমেইল ঠিকানা লিখুন");
+      return;
+    }
+
+    if (!password) {
+      toast.error("পাসওয়ার্ড লিখুন");
+      return;
+    }
+
     if (password.length < 8) {
       toast.error("পাসওয়ার্ড কমপক্ষে ৮ অক্ষরের হতে হবে");
+      return;
+    }
+
+    if (!confirmPassword) {
+      toast.error("পাসওয়ার্ড নিশ্চিত করুন");
       return;
     }
 
@@ -78,6 +101,7 @@ export default function SignUpPage() {
       }
 
       toast.success("অ্যাকাউন্ট তৈরি হয়েছে!");
+
       router.replace("/signin");
       router.refresh();
     } catch {
@@ -89,6 +113,7 @@ export default function SignUpPage() {
     }
   }
 
+  // Google/GitHub authentication.
   async function handleSocialLogin(
     provider: "google" | "github"
   ) {
@@ -99,7 +124,7 @@ export default function SignUpPage() {
     try {
       const result = await signIn.social({
         provider,
-        callbackURL: "/",
+        callbackURL: withAuthToast("/"),
         errorCallbackURL: "/signup",
       });
 
@@ -107,6 +132,7 @@ export default function SignUpPage() {
         toast.error(
           result.error.message || "সোশ্যাল লগইন ব্যর্থ হয়েছে"
         );
+
         setSocialLoading(null);
       }
     } catch {
@@ -115,6 +141,7 @@ export default function SignUpPage() {
     }
   }
 
+  // Original design classes: unchanged.
   const inputClass =
     "h-[35px] w-full rounded-[9px] border border-[#dce6de] bg-transparent px-3 text-[13px] text-[#243027] outline-none focus:border-[#008d43] focus:ring-1 focus:ring-[#008d43]";
 
@@ -127,6 +154,7 @@ export default function SignUpPage() {
   return (
     <main className="min-h-[calc(100vh-190px)] bg-[#f0f5f0] px-4 pb-14 pt-6">
       <div className="mx-auto w-full max-w-[350px]">
+        {/* Heading */}
         <div className="mb-5 text-center">
           <h1 className="text-[24px] font-extrabold text-[#1e2b21]">
             অ্যাকাউন্ট তৈরি করুন
@@ -138,7 +166,12 @@ export default function SignUpPage() {
         </div>
 
         <div className="rounded-[15px] border border-[#dce6de] bg-[#fbfdfb] px-5 py-5">
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form
+            onSubmit={handleSubmit}
+            noValidate
+            className="space-y-4"
+          >
+            {/* Name */}
             <div>
               <label
                 htmlFor="signup-name"
@@ -161,6 +194,7 @@ export default function SignUpPage() {
               />
             </div>
 
+            {/* Email */}
             <div>
               <label
                 htmlFor="signup-email"
@@ -183,6 +217,7 @@ export default function SignUpPage() {
               />
             </div>
 
+            {/* Password */}
             <div>
               <label
                 htmlFor="signup-password"
@@ -206,6 +241,7 @@ export default function SignUpPage() {
               />
             </div>
 
+            {/* Confirm password */}
             <div>
               <label
                 htmlFor="signup-confirm-password"
@@ -240,14 +276,18 @@ export default function SignUpPage() {
             </button>
           </form>
 
+          {/* Divider */}
           <div className="my-4 flex items-center gap-3">
             <div className="h-px flex-1 bg-[#dce6de]" />
+
             <span className="text-[12px] text-[#6b786e]">
               অথবা
             </span>
+
             <div className="h-px flex-1 bg-[#dce6de]" />
           </div>
 
+          {/* Social signup */}
           <div className="grid grid-cols-2 gap-2">
             <button
               type="button"
@@ -256,6 +296,7 @@ export default function SignUpPage() {
               className={socialButtonClass}
             >
               <GoogleIcon />
+
               {socialLoading === "google"
                 ? "অপেক্ষা..."
                 : "Google দিয়ে চালিয়ে যান"}
@@ -268,14 +309,17 @@ export default function SignUpPage() {
               className={socialButtonClass}
             >
               <GitHubIcon />
+
               {socialLoading === "github"
                 ? "অপেক্ষা..."
                 : "GitHub দিয়ে চালিয়ে যান"}
             </button>
           </div>
 
+          {/* Sign-in link */}
           <p className="mt-4 text-center text-[12px] text-[#445148]">
             অ্যাকাউন্ট আছে?{" "}
+
             <Link
               href="/signin"
               className="font-semibold text-[#008e42] hover:underline"
@@ -285,6 +329,7 @@ export default function SignUpPage() {
           </p>
         </div>
 
+        {/* Back home */}
         <div className="mt-5 text-center">
           <Link
             href="/"

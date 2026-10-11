@@ -8,6 +8,7 @@ import { signIn } from "@/lib/auth-client";
 import GoogleIcon from "@/components/GoogleIcon";
 import GitHubIcon from "@/components/GitHubIcon";
 import toast from "react-hot-toast";
+import { isValidEmail, withAuthToast } from "@/lib/auth-toast";
 
 export default function SignInPage() {
   const router = useRouter();
@@ -20,15 +21,13 @@ export default function SignInPage() {
     "google" | "github" | null
   >(null);
 
-  // OAuth error returned by BetterAuth
   const oauthError = searchParams.get("error");
   const oauthErrorDescription =
     searchParams.get("error_description");
 
-  // Remember the product the visitor originally clicked
+  // Preserve the original destination after login.
   const requestedPath = searchParams.get("callbackUrl");
 
-  // Only allow internal redirect paths
   const destination =
     requestedPath?.startsWith("/") &&
     !requestedPath.startsWith("//") &&
@@ -36,10 +35,10 @@ export default function SignInPage() {
       ? requestedPath
       : "/";
 
-  // Preserve the destination if OAuth authentication fails
   const oauthErrorCallbackURL =
     `/signin?callbackUrl=${encodeURIComponent(destination)}`;
 
+  // Show OAuth errors returned after redirect.
   useEffect(() => {
     if (!oauthError) return;
 
@@ -55,11 +54,26 @@ export default function SignInPage() {
     });
   }, [oauthError, oauthErrorDescription]);
 
-  // Email/password sign-in
+  // Email/password login with toast validation.
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (loading || socialLoading) return;
+
+    if (!email.trim()) {
+      toast.error("ইমেইল লিখুন");
+      return;
+    }
+
+    if (!isValidEmail(email.trim())) {
+      toast.error("সঠিক ইমেইল ঠিকানা লিখুন");
+      return;
+    }
+
+    if (!password) {
+      toast.error("পাসওয়ার্ড লিখুন");
+      return;
+    }
 
     setLoading(true);
 
@@ -78,7 +92,6 @@ export default function SignInPage() {
 
       toast.success("সাইন ইন সফল হয়েছে!");
 
-      // Return to the selected product
       router.replace(destination);
       router.refresh();
     } catch {
@@ -88,7 +101,7 @@ export default function SignInPage() {
     }
   }
 
-  // Google / GitHub sign-in
+  // Google/GitHub login.
   async function handleSocialLogin(
     provider: "google" | "github"
   ) {
@@ -99,11 +112,7 @@ export default function SignInPage() {
     try {
       const result = await signIn.social({
         provider,
-
-        // Return to the selected product after successful OAuth
-        callbackURL: destination,
-
-        // Keep the selected product URL if OAuth fails
+        callbackURL: withAuthToast(destination),
         errorCallbackURL: oauthErrorCallbackURL,
       });
 
@@ -120,6 +129,7 @@ export default function SignInPage() {
     }
   }
 
+  // Original design classes: unchanged.
   const inputClass =
     "h-[35px] w-full rounded-[9px] border border-[#dce6de] bg-transparent px-3 text-[13px] text-[#243027] outline-none focus:border-[#008d43] focus:ring-1 focus:ring-[#008d43]";
 
@@ -132,7 +142,6 @@ export default function SignInPage() {
   return (
     <main className="min-h-[calc(100vh-190px)] bg-[#f0f5f0] px-4 pb-14 pt-6">
       <div className="mx-auto w-full max-w-[350px]">
-
         {/* Heading */}
         <div className="mb-5 text-center">
           <h1 className="text-[24px] font-extrabold text-[#1e2b21]">
@@ -146,10 +155,9 @@ export default function SignInPage() {
 
         {/* Sign-in card */}
         <div className="rounded-[15px] border border-[#dce6de] bg-[#fbfdfb] px-5 py-5">
-
-          {/* Email/password form */}
           <form
             onSubmit={handleSubmit}
+            noValidate
             className="space-y-4"
           >
             <div>
@@ -220,13 +228,9 @@ export default function SignInPage() {
 
           {/* Social authentication */}
           <div className="grid grid-cols-2 gap-2">
-
-            {/* Google */}
             <button
               type="button"
-              onClick={() =>
-                handleSocialLogin("google")
-              }
+              onClick={() => handleSocialLogin("google")}
               disabled={loading || socialLoading !== null}
               className={socialButtonClass}
             >
@@ -237,12 +241,9 @@ export default function SignInPage() {
                 : "Google দিয়ে চালিয়ে যান"}
             </button>
 
-            {/* GitHub */}
             <button
               type="button"
-              onClick={() =>
-                handleSocialLogin("github")
-              }
+              onClick={() => handleSocialLogin("github")}
               disabled={loading || socialLoading !== null}
               className={socialButtonClass}
             >
