@@ -6,20 +6,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 import { signIn } from "@/lib/auth-client";
 import GoogleIcon from "@/components/GoogleIcon";
+import GitHubIcon from "@/components/GitHubIcon";
 import toast from "react-hot-toast";
-
-function GitHubIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className="h-4 w-4 shrink-0"
-      fill="currentColor"
-      aria-hidden="true"
-    >
-      <path d="M12 .8a11.2 11.2 0 0 0-3.54 21.82c.56.1.77-.24.77-.54v-2.1c-3.13.68-3.79-1.33-3.79-1.33-.51-1.3-1.25-1.25-1.25-1.02-.7.08-.69.08-.69 1.13.08 1.73 1.16 1.73 1.16 1.01 1.72 2.65 1.22 3.29.93.1-.73.4-1.22.72-1.5-2.5-.28-5.13-1.25-5.13-5.57 0-1.23.44-2.24 1.16-3.03-.12-.28-.5-1.43.11-2.98 0 0 .95-.3 3.08 1.16a10.75 10.75 0 0 1 5.6 0c2.14-1.45 3.08-1.16 3.08-1.16.62 1.55.23 2.7.12 2.98.72.79 1.15 1.8 1.15 3.03 0 4.33-2.63 5.28-5.14 5.56.41.35.77 1.03.77 2.08v3.08c0 4.33-2.63 5.28-5.14 5.56.41.35.77 1.03.77 2.08v3.08c0 .3.2.65.78.54A11.2 11.2 0 0 0 12 .8z" />
-    </svg>
-  );
-}
 
 export default function SignInPage() {
   const router = useRouter();
@@ -33,7 +21,8 @@ export default function SignInPage() {
   >(null);
 
   const oauthError = searchParams.get("error");
-  const oauthErrorDescription = searchParams.get("error_description");
+  const oauthErrorDescription =
+    searchParams.get("error_description");
 
   const requestedPath = searchParams.get("callbackUrl");
 
@@ -49,7 +38,7 @@ export default function SignInPage() {
 
     const message =
       oauthError === "account_not_linked"
-        ? "এই ইমেইলে আগে অ্যাকাউন্ট আছে। ইমেইল ও পাসওয়ার্ড দিয়ে সাইন ইন করে Google অ্যাকাউন্ট লিংক করুন।"
+        ? "এই ইমেইলে আগে অ্যাকাউন্ট আছে। আগে আপনার বিদ্যমান অ্যাকাউন্টে সাইন ইন করে প্রোফাইল থেকে GitHub লিংক করুন।"
         : oauthErrorDescription ||
           `সোশ্যাল লগইন ব্যর্থ হয়েছে: ${oauthError}`;
 
@@ -139,7 +128,10 @@ export default function SignInPage() {
         <div className="rounded-[15px] border border-[#dce6de] bg-[#fbfdfb] px-5 py-5">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="signin-email" className={labelClass}>
+              <label
+                htmlFor="signin-email"
+                className={labelClass}
+              >
                 ইমেইল
               </label>
 
@@ -156,7 +148,10 @@ export default function SignInPage() {
             </div>
 
             <div>
-              <label htmlFor="signin-password" className={labelClass}>
+              <label
+                htmlFor="signin-password"
+                className={labelClass}
+              >
                 পাসওয়ার্ড
               </label>
 

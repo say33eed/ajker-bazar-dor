@@ -2,6 +2,7 @@
 "use client";
 
 import Link from "next/link";
+import LinkGitHubButton from "@/components/LinkGitHubButton";
 import { useSession } from "@/lib/auth-client";
 
 export default function ProfilePage() {
@@ -90,6 +91,10 @@ export default function ProfilePage() {
                   : "যাচাই করা হয়নি"}
               </p>
             </div>
+          </div>
+
+          <div>
+            <LinkGitHubButton />
           </div>
 
           <Link
