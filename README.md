@@ -161,8 +161,6 @@ src/
 
 ## ☁️ Deployment
 
-The project is deployed on **Vercel**.
-
 To deploy your own copy:
 
 1. Push your project to GitHub.
@@ -202,8 +200,6 @@ Prices are provided for informational purposes and may change depending on marke
 ---
 
 <div align="center">
-
-Built for **Programming Hero — Batch 14, Assignment 07**.
 
 **[🌐 Visit Ajker Bazar Dor](https://ajker-bazar-dor-fawn.vercel.app)**
 
