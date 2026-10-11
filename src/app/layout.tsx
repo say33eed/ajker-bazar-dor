@@ -1,10 +1,13 @@
+
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Hind_Siliguri } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Toaster } from "react-hot-toast";
 import AuthToastHandler from "@/components/AuthToastHandler";
+import ProtectedRouteToast from "@/components/ProtectedRouteToast";
 
 const hindSiliguri = Hind_Siliguri({
   subsets: ["bengali", "latin"],
@@ -26,10 +29,18 @@ export default function RootLayout({
     <html lang="bn" data-theme="light">
       <body className={`${hindSiliguri.className} antialiased`}>
         <Navbar />
+
         <main className="min-h-screen">{children}</main>
+
         <Footer />
+
         <Toaster position="top-center" reverseOrder={false} />
+
         <AuthToastHandler />
+
+        <Suspense fallback={null}>
+          <ProtectedRouteToast />
+        </Suspense>
       </body>
     </html>
   );

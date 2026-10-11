@@ -105,9 +105,12 @@ export default function ProductCard({
     if (isPending) return;
 
     if (!session?.user) {
-      router.push(
-        `/signin?callbackUrl=${encodeURIComponent(productPath)}`
-      );
+      const params = new URLSearchParams({
+        callbackUrl: productPath,
+        reason: "auth-required",
+      });
+
+      router.push(`/signin?${params.toString()}`);
       return;
     }
 

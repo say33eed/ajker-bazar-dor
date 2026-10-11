@@ -16,7 +16,9 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (!isPending && !session) {
-      router.replace("/signin?callbackUrl=/profile");
+      router.replace(
+        "/signin?callbackUrl=%2Fprofile&reason=auth-required"
+      );
     }
   }, [isPending, session, router]);
 
@@ -103,7 +105,6 @@ function ProfileContent({
   return (
     <main className="min-h-screen bg-[#f0f5f0] px-4 pb-20 pt-10">
       <div className="mx-auto w-full max-w-[595px]">
-
         {/* Page heading */}
         <header className="mb-5">
           <h1 className="text-[22px] font-extrabold leading-tight text-[#263027]">
@@ -118,8 +119,7 @@ function ProfileContent({
         {/* User identity card */}
         <section className="mb-5 flex items-center justify-between gap-4 rounded-[15px] border border-[#dfe7df] bg-[#fbfdfb] px-[19px] py-[19px]">
           <div className="flex min-w-0 items-center gap-[14px]">
-
-            {/* Google / GitHub profile picture */}
+            {/* Profile picture */}
             <div className="flex h-[64px] w-[64px] shrink-0 items-center justify-center overflow-hidden rounded-[12px] bg-[#e7eee8]">
               {image && !imageFailed ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -183,7 +183,6 @@ function ProfileContent({
             তথ্য
           </h3>
 
-          {/* Name display and update navigation */}
           <div className="px-[19px]">
             <label
               htmlFor="profile-name"
@@ -200,7 +199,7 @@ function ProfileContent({
               className="mb-[13px] h-[34px] w-full rounded-[8px] border border-[#dfe7df] bg-transparent px-3 text-[13px] text-[#263027] outline-none transition-colors focus:border-[#008e43] focus:ring-1 focus:ring-[#008e43]"
             />
 
-            {/* Same design; now navigates to update route */}
+            {/* Update button navigates to separate route */}
             <Link
               href="/profile/update"
               className="flex h-[34px] w-full items-center justify-center rounded-[7px] bg-[#008e43] text-[13px] font-bold text-white shadow-[0_3px_3px_rgba(0,100,40,0.25)] transition-colors hover:bg-[#007a39] disabled:cursor-not-allowed disabled:opacity-60"

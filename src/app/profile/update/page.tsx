@@ -89,7 +89,7 @@ function UpdateProfileForm({
             noValidate
             className="mt-7 space-y-5"
           >
-            {/* Name input */}
+            {/* Name */}
             <div>
               <label
                 htmlFor="name"
@@ -110,7 +110,7 @@ function UpdateProfileForm({
               />
             </div>
 
-            {/* Existing read-only email field */}
+            {/* Read-only email */}
             <div>
               <label
                 htmlFor="email"
@@ -132,7 +132,7 @@ function UpdateProfileForm({
               </p>
             </div>
 
-            {/* Update Information button */}
+            {/* Submit */}
             <button
               type="submit"
               disabled={saving}
@@ -159,7 +159,7 @@ export default function UpdateProfilePage() {
   useEffect(() => {
     if (!isPending && !session) {
       router.replace(
-        "/signin?callbackUrl=/profile/update"
+        "/signin?callbackUrl=%2Fprofile%2Fupdate&reason=auth-required"
       );
     }
   }, [isPending, session, router]);
