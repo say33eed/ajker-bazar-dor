@@ -13,24 +13,6 @@ A responsive, Bengali-first grocery price dashboard for browsing essential produ
 
 ---
 
-## 📖 About the Project
-
-**Ajker Bazar Dor (BazarDor)** helps users explore the prices of everyday essentials in Bangladesh. The interface displays product names, units, prices, and price movements in Bangla, with category navigation and detailed market comparisons.
-
-The project was built as **Programming Hero — Batch 14, Assignment 07**.
-
-## ✨ Key Features
-
-- **📈 Daily price movements:** Separate sections highlight products whose prices have increased or decreased, alongside the complete product catalog.
-- **🔁 Live-style price ticker:** A continuously moving, right-to-left strip displays product names, units, current prices, and percentage changes. It respects reduced-motion preferences.
-- **🗂️ Category browsing:** Explore essential goods by category, with a responsive grid and a category-specific product count.
-- **↕️ Price sorting:** Sort category products by default order, lowest price first, or highest price first.
-- **📊 Product details:** View today's price, change from yesterday, minimum, maximum, average, and a market-wise price comparison table when data is available.
-- **🔐 Authentication:** Email/password sign-up and sign-in, plus Google and GitHub OAuth using Better Auth.
-- **👤 Profile management:** View account information and update the user's display name.
-- **🇧🇩 Bengali-friendly interface:** Bangla product names, Bengali numerals, localized units, and price-change indicators.
-- **📱 Responsive design:** Layouts designed for mobile, tablet, and desktop screens, with loading states and helpful empty/error pages.
-
 ## 🧰 Tech Stack
 
 | Area | Technology |
@@ -43,6 +25,18 @@ The project was built as **Programming Hero — Batch 14, Assignment 07**.
 | Notifications | React Hot Toast |
 | Hosting | Vercel |
 | Data | BazarDor products and categories API |
+
+
+## ✨ Key Features
+
+- **🔐 Authentication:** Email/password sign-up and sign-in, plus Google and GitHub OAuth using Better Auth.
+- **📈 Daily price movements:** Separate sections highlight products whose prices have increased or decreased, alongside the complete product catalog.
+- **🔁 Live-style price ticker:** A continuously moving, right-to-left strip displays product names, units, current prices, and percentage changes. It respects reduced-motion preferences.
+- **🗂️ Category browsing:** Explore essential goods by category, with a responsive grid and a category-specific product count.
+- **↕️ Price sorting:** Sort category products by default order, lowest price first, or highest price first.
+- **📊 Product details:** View today's price, change from yesterday, minimum, maximum, average, and a market-wise price comparison table when data is available.
+
+
 
 ## 🗺️ Pages & Routes
 
