@@ -1,18 +1,17 @@
 
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { authClient, useSession } from "@/lib/auth-client";
 import toast from "react-hot-toast";
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { data: session, isPending, refetch } = useSession();
+  const { data: session, isPending } = useSession();
 
   const user = session?.user;
-
-  const [saving, setSaving] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
 
   useEffect(() => {
@@ -46,37 +45,6 @@ export default function ProfilePage() {
     }
   }
 
-  async function handleUpdate(newName: string): Promise<boolean> {
-    if (saving) return false;
-
-    setSaving(true);
-
-    try {
-      const result = await authClient.updateUser({
-        name: newName,
-      });
-
-      if (result.error) {
-        toast.error(
-          result.error.message || "নাম আপডেট করা যায়নি"
-        );
-        return false;
-      }
-
-      toast.success("প্রোফাইল আপডেট হয়েছে");
-
-      await refetch();
-      router.refresh();
-
-      return true;
-    } catch {
-      toast.error("নাম আপডেট করা যায়নি");
-      return false;
-    } finally {
-      setSaving(false);
-    }
-  }
-
   if (isPending) {
     return (
       <main className="min-h-screen bg-[#f0f5f0] px-4 py-12">
@@ -106,9 +74,7 @@ export default function ProfilePage() {
       currentName={user.name}
       email={user.email}
       image={user.image}
-      saving={saving}
       signingOut={signingOut}
-      onUpdate={handleUpdate}
       onSignOut={handleSignOut}
     />
   );
@@ -118,9 +84,7 @@ type ProfileContentProps = {
   currentName: string;
   email: string;
   image?: string | null;
-  saving: boolean;
   signingOut: boolean;
-  onUpdate: (name: string) => Promise<boolean>;
   onSignOut: () => Promise<void>;
 };
 
@@ -128,38 +92,13 @@ function ProfileContent({
   currentName,
   email,
   image,
-  saving,
   signingOut,
-  onUpdate,
   onSignOut,
 }: ProfileContentProps) {
-  const [name, setName] = useState(currentName);
   const [imageFailed, setImageFailed] = useState(false);
 
   const initial =
     currentName.trim().charAt(0).toUpperCase() || "U";
-
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    const trimmedName = name.trim();
-
-    if (!trimmedName) {
-      toast.error("আপনার নাম লিখুন");
-      return;
-    }
-
-    if (trimmedName === currentName) {
-      toast("নাম পরিবর্তন করা হয়নি");
-      return;
-    }
-
-    const updated = await onUpdate(trimmedName);
-
-    if (updated) {
-      setName(trimmedName);
-    }
-  }
 
   return (
     <main className="min-h-screen bg-[#f0f5f0] px-4 pb-20 pt-10">
@@ -244,8 +183,8 @@ function ProfileContent({
             তথ্য
           </h3>
 
-          {/* Update name form */}
-          <form onSubmit={handleSubmit} className="px-[19px]">
+          {/* Name display and update navigation */}
+          <div className="px-[19px]">
             <label
               htmlFor="profile-name"
               className="mb-[6px] block text-[12px] font-medium text-[#263027]"
@@ -256,22 +195,19 @@ function ProfileContent({
             <input
               id="profile-name"
               type="text"
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              autoComplete="name"
-              required
-              maxLength={100}
+              value={currentName}
+              readOnly
               className="mb-[13px] h-[34px] w-full rounded-[8px] border border-[#dfe7df] bg-transparent px-3 text-[13px] text-[#263027] outline-none transition-colors focus:border-[#008e43] focus:ring-1 focus:ring-[#008e43]"
             />
 
-            <button
-              type="submit"
-              disabled={saving}
+            {/* Same design; now navigates to update route */}
+            <Link
+              href="/profile/update"
               className="flex h-[34px] w-full items-center justify-center rounded-[7px] bg-[#008e43] text-[13px] font-bold text-white shadow-[0_3px_3px_rgba(0,100,40,0.25)] transition-colors hover:bg-[#007a39] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {saving ? "আপডেট হচ্ছে..." : "আপডেট"}
-            </button>
-          </form>
+              আপডেট
+            </Link>
+          </div>
         </section>
       </div>
     </main>

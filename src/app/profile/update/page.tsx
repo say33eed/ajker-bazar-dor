@@ -10,9 +10,11 @@ import toast from "react-hot-toast";
 function UpdateProfileForm({
   currentName,
   email,
+  onUpdated,
 }: {
   currentName: string;
   email: string;
+  onUpdated: () => Promise<void>;
 }) {
   const router = useRouter();
 
@@ -22,10 +24,17 @@ function UpdateProfileForm({
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
+    if (saving) return;
+
     const newName = name.trim();
 
     if (!newName) {
       toast.error("আপনার নাম লিখুন");
+      return;
+    }
+
+    if (newName === currentName) {
+      toast("নাম পরিবর্তন করা হয়নি");
       return;
     }
 
@@ -43,8 +52,11 @@ function UpdateProfileForm({
         return;
       }
 
+      await onUpdated();
+
       toast.success("প্রোফাইল আপডেট হয়েছে!");
-      router.push("/profile");
+
+      router.replace("/profile");
       router.refresh();
     } catch {
       toast.error("প্রোফাইল আপডেট করা যায়নি");
@@ -72,7 +84,12 @@ function UpdateProfileForm({
             আপনার অ্যাকাউন্টের তথ্য পরিবর্তন করুন
           </p>
 
-          <form onSubmit={handleSubmit} className="mt-7 space-y-5">
+          <form
+            onSubmit={handleSubmit}
+            noValidate
+            className="mt-7 space-y-5"
+          >
+            {/* Name input */}
             <div>
               <label
                 htmlFor="name"
@@ -93,6 +110,7 @@ function UpdateProfileForm({
               />
             </div>
 
+            {/* Existing read-only email field */}
             <div>
               <label
                 htmlFor="email"
@@ -108,17 +126,19 @@ function UpdateProfileForm({
                 readOnly
                 className="input w-full cursor-not-allowed border-[#dfe8e0] bg-[#f1f4f1] text-gray-500"
               />
+
               <p className="mt-2 text-xs text-[#68756b]">
                 এখানে ইমেইল পরিবর্তন করা যাবে না।
               </p>
             </div>
 
+            {/* Update Information button */}
             <button
               type="submit"
-              disabled={saving || !name.trim()}
+              disabled={saving}
               className="inline-flex w-full items-center justify-center rounded-[14px] border border-[#007a3c] bg-[#008b45] px-6 py-3 text-sm font-bold text-white shadow-[0_6px_10px_rgba(0,139,69,0.32)] transition-all hover:bg-[#007e3e] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {saving ? "সংরক্ষণ হচ্ছে..." : "পরিবর্তন সংরক্ষণ করুন"}
+              {saving ? "আপডেট হচ্ছে..." : "তথ্য আপডেট করুন"}
             </button>
           </form>
         </div>
@@ -129,11 +149,18 @@ function UpdateProfileForm({
 
 export default function UpdateProfilePage() {
   const router = useRouter();
-  const { data: session, isPending } = useSession();
+
+  const {
+    data: session,
+    isPending,
+    refetch,
+  } = useSession();
 
   useEffect(() => {
     if (!isPending && !session) {
-      router.replace("/signin");
+      router.replace(
+        "/signin?callbackUrl=/profile/update"
+      );
     }
   }, [isPending, session, router]);
 
@@ -150,6 +177,9 @@ export default function UpdateProfilePage() {
       key={session.user.id}
       currentName={session.user.name}
       email={session.user.email}
+      onUpdated={async () => {
+        await refetch();
+      }}
     />
   );
 }
