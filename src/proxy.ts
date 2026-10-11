@@ -4,13 +4,13 @@ import type { NextRequest } from "next/server";
 import { auth } from "./lib/auth";
 
 export async function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+  const { pathname, search } = request.nextUrl;
 
   const isProtectedRoute =
     pathname === "/profile" ||
-    pathname.startsWith("/profile/");
+    pathname.startsWith("/profile/") ||
+    pathname.startsWith("/product/");
 
-  // Public pages, including product details, need no login.
   if (!isProtectedRoute) {
     return NextResponse.next();
   }
@@ -24,7 +24,12 @@ export async function proxy(request: NextRequest) {
 
     signInUrl.searchParams.set(
       "callbackUrl",
-      pathname
+      `${pathname}${search}`
+    );
+
+    signInUrl.searchParams.set(
+      "reason",
+      "auth-required"
     );
 
     return NextResponse.redirect(signInUrl);
@@ -34,5 +39,9 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/profile", "/profile/:path*"],
+  matcher: [
+    "/profile",
+    "/profile/:path*",
+    "/product/:path*",
+  ],
 };
